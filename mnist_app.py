@@ -301,3 +301,5 @@ with tab2:
 # Däremot kan t ex Logistisk Regression tränas inkrementellt med partial_fit. Dock har den lägre accuracy som utgångspunkt.
 
 # Neurala nät hade kunnat tränas, finjusteras och förbättra prestandan men det hade krävts mer arbete
+
+#  Network URL: http://192.168.1.211:8502
