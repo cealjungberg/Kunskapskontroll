@@ -4,6 +4,8 @@
 Appen finns här:  
 https://kunskapskontroll-tdq5o2erxvzjpd7xoj8ybm.streamlit.app/
 
+---
+
 Detta projekt innehåller en maskininlärningsmodell som känner igen handskrivna siffror (0–9) baserat på **MNIST-datasetet**.  
 
 En Streamlit-app gör det möjligt att rita en siffra och få modellens prediktion direkt i webbläsaren.
