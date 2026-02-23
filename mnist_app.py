@@ -48,11 +48,62 @@ st.divider()
 # =========================
 # 4) Ladda modellen (cache så den inte laddas om vid varje rerun)
 # =========================
-@st.cache_resource
-def load_model():
-    return joblib.load("mnist_model.joblib")
+#@st.cache_resource
+#def load_model():
+#    return joblib.load("mnist_model.joblib")
 
-model = load_model()
+#model = load_model()
+
+import os
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+
+MODEL_PATH = "mnist_model.joblib"
+
+@st.cache_resource
+def load_or_train_model():
+    # 1) Om modellen finns: ladda
+    if os.path.exists(MODEL_PATH):
+        return joblib.load(MODEL_PATH)
+
+    # 2) Annars: träna en gång (första gången appen körs i Streamlit Cloud)
+    with st.spinner("Ingen modell hittades. Tränar en modell första gången (kan ta någon minut)..."):
+        # Hämta MNIST (laddas ner från OpenML)
+        X, y = fetch_openml("mnist_784", version=1, as_frame=False, return_X_y=True)
+        y = y.astype(np.int64)
+
+        # Gör det lättare för Streamlit Cloud: träna på en subset
+        # (Kan justeras: 10000–20000 är ofta en bra kompromiss.)
+        n = 12000
+        X = X[:n].astype(np.float64)
+        y = y[:n]
+
+        # Train/test (mest för stabilitet – man behöver egentligen inte skriva ut resultat här)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42, stratify=y
+        )
+
+        # Bygg en pipeline som matchar att apen skickar in 28x28=784 
+        # och som inkluderar crop-steget (så klassen CenterCrop20x20 används).
+        pipe = Pipeline(steps=[
+            ("crop", CenterCrop20x20()),
+            ("model", RandomForestClassifier(
+                n_estimators=200,      # sänk/höj vid behov (t.ex. 100–300)
+                random_state=42,
+                n_jobs=-1
+            ))
+        ])
+
+        pipe.fit(X_train, y_train)
+
+        # Spara modellen i appens filsystem (Streamlit Cloud)
+        joblib.dump(pipe, MODEL_PATH)
+
+        return pipe
+
+model = load_or_train_model()
 
 
 # =========================
@@ -285,21 +336,31 @@ with tab2:
         st.info("Ladda upp en bild för att göra en prediktion.")
 
 
+
+
+
+
 # =========================
-# 11) Möjlig fortsättning/vidareutveckling av appen
+# 11) Möjlig vidareutveckling
 # =========================
-# Nästa steg hade kunnat vara att spara felexempel och skapa ett nytt dataset för att träna modellen så att den blir bättre på att tolka ritade siffror med olika handstilar
-
-# Om man hade kunnat tala om vilken siffra som var rätt, hade modellen kunnat lära sig av det.
-
-# Man hade kunnat ha en suto-treshold som testar några olika tröskelvärden, kör predict_probs för varje alternativ och väljer den som har högst sannolikhet att stämma
-
-# Normaliseringen kan förbättras genom bl a beskärning (bounding box) och justering av tjocklek/kontrast för att undvika brus
-
-# Vissa andra ML-modeller kan "lära sig av fel" (inkrementellt). RandomForest, som jag använder nu, behöver tränas om med ny data. 
-
-# Däremot kan t ex Logistisk Regression tränas inkrementellt med partial_fit. Dock har den lägre accuracy som utgångspunkt.
-
-# Neurala nät hade kunnat tränas, finjusteras och förbättra prestandan men det hade krävts mer arbete
-
-#  Network URL: http://192.168.1.211:8502
+# En naturlig fortsättning vore att spara felexempel från appen och använda dem
+# för att bygga ett utökat dataset. Om användaren kunde ange rätt siffra vid 
+# feltolkning skulle modellen kunna förbättras genom regelbunden omträning.
+#
+# Preprocessing är avgörande för resultatet. Förbättrad beskärning, centrering,
+# kontrastjustering och brusreducering kan ge stor effekt.
+#
+# Auto-treshold hade kunnat testa några olika tröskelvärden, köra predict_proba
+# för varje alternativ och välja det som har högst sannolikhet att stämma.
+#
+# Alternativa modeller, som t.ex. SVC med RBF-kärna eller neurala nät, hade kunnat
+# testas för högre precision, men till priset av längre träningstid och högre
+# komplexitet. RandomForest behöver i regel tränas om med ny data, medan vissa
+# linjära modeller kan uppdateras inkrementellt (med partial_fit).
+#
+# Att visa topp-3 prediktioner med sannolikheter ger insyn i modellens osäkerhet
+# och gör det möjligt att analysera vilka siffror som ofta förväxlas. Detta kan
+# vägleda vidare förbättringar i både preprocessing och modellval.
+#
+# Sammantaget visar projektet hur kombinationen av databehandling, modellval och
+# användarinteraktion påverkar prestandan i en maskininlärningsapplikation.
