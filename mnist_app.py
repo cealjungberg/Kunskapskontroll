@@ -269,10 +269,10 @@ with tab1:
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        # håller en stabil plats i layouten så canvasen alltid renderas på samma ställe
+        # Håller en stabil plats i layouten så canvasen alltid renderas på samma ställe
         canvas_slot = st.empty()
 
-        canvas = st_canvas(
+        canvas = canvas_slot.st_canvas(
             stroke_width=stroke_width,
             stroke_color="white",
             background_color="black",
@@ -307,13 +307,13 @@ with tab1:
                 pred, top3 = predict_with_confidence(model, x_vec)
                 st.session_state.result = (pred, top3, preview)
 
-      # Rendera resultatet i en container som alltid finns
-    with result_slot.container():
-        if st.session_state.result is not None:
-            pred, top3, _ = st.session_state.result
-            render_result(pred, top3)
-        else:
-            st.caption("Ingen prediktion ännu.")
+        # Rendera resultatet i en container som alltid finns (för stabil layout)
+        with result_slot.container():
+            if st.session_state.result is not None:
+                pred, top3, _ = st.session_state.result
+                render_result(pred, top3)
+            else:
+                st.caption("Ingen prediktion ännu.")
 
 
 # =========================
