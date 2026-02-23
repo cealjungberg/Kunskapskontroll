@@ -121,7 +121,7 @@ def reset_draw():
     # Rensa sparat resultat
     st.session_state.result = None
     # Kör om appen
-    st.rerun()
+    #st.rerun()  # Tar bort för att förhindra att sidan laddar om helt och "hoppar"
 
 
 # =========================
