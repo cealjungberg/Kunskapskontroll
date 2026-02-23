@@ -268,11 +268,12 @@ with tab1:
 
     col1, col2 = st.columns([1, 1])
 
-    with col1:
-        # Håller en stabil plats i layouten så canvasen alltid renderas på samma ställe
-        canvas_slot = st.empty()
+with col1:
+    # Håller en stabil plats i layouten
+    canvas_slot = st.empty()
 
-        canvas = canvas_slot.st_canvas(
+    with canvas_slot.container():
+        canvas = st_canvas(
             stroke_width=stroke_width,
             stroke_color="white",
             background_color="black",
@@ -282,7 +283,7 @@ with tab1:
             key=f"canvas_{st.session_state.canvas_key}",
         )
 
-        predict_draw = st.button("Prediktera", use_container_width=True)
+    predict_draw = st.button("Prediktera", use_container_width=True)
 
     with col2:
         st.subheader("Förhandsvisning & resultat")
