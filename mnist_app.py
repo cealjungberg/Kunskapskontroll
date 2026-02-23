@@ -243,8 +243,8 @@ with st.sidebar:
     stroke_width = st.slider("Pennbredd", 5, 40, 18)
 
     st.subheader("Preprocess")
-    invert_draw = st.checkbox("Invertera färger (rita)", value=False)
-    invert_up = st.checkbox("Invertera färger (uppladdad)", value=True)
+    invert_draw = st.checkbox("Invertera färger (ritad siffra)", value=False)
+    invert_up = st.checkbox("Invertera färger (uppladdad bild)", value=True)
 
     threshold_on = st.checkbox("Öka kontrast (tröskling)", value=True)
     threshold_value = st.slider("Tröskelvärde", 0, 255, 50)
@@ -269,6 +269,9 @@ with tab1:
     col1, col2 = st.columns([1, 1])
 
     with col1:
+        # håller en stabil plats i layouten så canvasen alltid renderas på samma ställe
+        canvas_slot = st.empty()
+
         canvas = st_canvas(
             stroke_width=stroke_width,
             stroke_color="white",
@@ -284,6 +287,9 @@ with tab1:
     with col2:
         st.subheader("Förhandsvisning & resultat")
 
+        preview_slot = st.empty()
+        result_slot = st.empty()
+
         if canvas.image_data is not None:
             img = Image.fromarray(canvas.image_data.astype("uint8"), mode="RGBA")
 
@@ -295,16 +301,19 @@ with tab1:
                 threshold_value=threshold_value,
             )
 
-            st.image(preview, clamp=True, caption="28×28 efter preprocess (rita)")
+            preview_slot.image(preview, clamp=True, caption="28×28 efter preprocess (rita)")
 
             if predict_draw:
                 pred, top3 = predict_with_confidence(model, x_vec)
                 st.session_state.result = (pred, top3, preview)
 
-        # Visa senast predikterade resultat (så det ligger kvar tills man testar igen)
+      # Rendera resultatet i en container som alltid finns
+    with result_slot.container():
         if st.session_state.result is not None:
             pred, top3, _ = st.session_state.result
             render_result(pred, top3)
+        else:
+            st.caption("Ingen prediktion ännu.")
 
 
 # =========================
