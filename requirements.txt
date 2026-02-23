@@ -4,3 +4,4 @@ pillow
 joblib
 streamlit-drawable-canvas
 numpy
+pandas
