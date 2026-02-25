@@ -360,6 +360,10 @@ with tab2:
 # Preprocessing är avgörande för resultatet. Förbättrad beskärning, centrering,
 # kontrastjustering och brusreducering kan ge stor effekt.
 #
+# Då jag har fokuserat mest på att tolka ritade siffror på canvas, finns potential
+# att förbättra prediktionssäkerheten mer även vad gäller uppladdade bilder med siffror.
+# Skalning och tjocklek på linjer är exempel på sådant som påverkar tolkningen.
+#
 # Auto-treshold hade kunnat testa några olika tröskelvärden, köra predict_proba
 # för varje alternativ och välja det som har högst sannolikhet att stämma.
 #
@@ -371,6 +375,9 @@ with tab2:
 # Att visa topp-3 prediktioner med sannolikheter ger insyn i modellens osäkerhet
 # och gör det möjligt att analysera vilka siffror som ofta förväxlas. Detta kan
 # vägleda vidare förbättringar i både preprocessing och modellval.
+#
+# Som nästa steg hade man kunnat lägga in voting mellan flera modeller för att öka 
+# säkerheten i prediktionerna. Ensemble-lösningen hade kunnat göra appen mer robust.
 #
 # Sammantaget visar projektet hur kombinationen av databehandling, modellval och
 # användarinteraktion påverkar prestandan i en maskininlärningsapplikation.
